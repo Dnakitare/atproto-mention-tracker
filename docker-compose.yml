@@ -1,0 +1,53 @@
+version: '3.8'
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: atproto-mention-tracker-app
+    restart: unless-stopped
+    working_dir: /var/www/
+    volumes:
+      - ./:/var/www
+    networks:
+      - atproto-mention-tracker
+
+  db:
+    image: postgres:15-alpine
+    container_name: atproto-mention-tracker-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${DB_DATABASE:-atproto_mention_tracker}
+      POSTGRES_USER: ${DB_USERNAME:-postgres}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-secret}
+    volumes:
+      - dbdata:/var/lib/postgresql/data
+    networks:
+      - atproto-mention-tracker
+
+  redis:
+    image: redis:alpine
+    container_name: atproto-mention-tracker-redis
+    restart: unless-stopped
+    networks:
+      - atproto-mention-tracker
+
+  nginx:
+    image: nginx:alpine
+    container_name: atproto-mention-tracker-nginx
+    restart: unless-stopped
+    ports:
+      - "8000:80"
+    volumes:
+      - ./:/var/www
+      - ./docker/nginx:/etc/nginx/conf.d/
+    networks:
+      - atproto-mention-tracker
+
+networks:
+  atproto-mention-tracker:
+    driver: bridge
+
+volumes:
+  dbdata: 
