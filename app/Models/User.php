@@ -69,4 +69,20 @@ class User extends Authenticatable
     {
         return $this->hasOne(NotificationSetting::class);
     }
+
+    /**
+     * Get the alerts for the user.
+     */
+    public function alerts(): HasMany
+    {
+        return $this->hasMany(Alert::class);
+    }
+
+    /**
+     * Route notifications for the Slack channel.
+     */
+    public function routeNotificationForSlack(): string
+    {
+        return $this->notificationSetting?->slack_webhook_url ?? '';
+    }
 }

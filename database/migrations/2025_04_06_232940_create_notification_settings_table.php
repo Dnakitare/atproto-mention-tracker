@@ -16,8 +16,13 @@ return new class extends Migration
             $table->foreignId('user_id')->constrained()->onDelete('cascade');
             $table->boolean('email_notifications')->default(true);
             $table->boolean('in_app_notifications')->default(true);
-            $table->json('email_frequency')->nullable();
-            $table->json('notification_preferences')->nullable();
+            $table->string('email_frequency')->default('immediate');
+            $table->json('notification_preferences')->default(json_encode([
+                'mention_spike' => true,
+                'sentiment_spike' => true,
+                'keyword_match' => true
+            ]));
+            $table->string('slack_webhook_url')->nullable();
             $table->timestamps();
 
             $table->unique('user_id');

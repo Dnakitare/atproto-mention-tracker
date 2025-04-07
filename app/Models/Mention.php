@@ -17,12 +17,11 @@ class Mention extends Model
      */
     protected $fillable = [
         'user_id',
-        'post_id',
-        'author_did',
         'author_handle',
-        'post_text',
-        'post_data',
+        'text',
+        'post_url',
         'post_indexed_at',
+        'sentiment',
     ];
 
     /**
@@ -31,8 +30,8 @@ class Mention extends Model
      * @var array<string, string>
      */
     protected $casts = [
-        'post_data' => 'array',
         'post_indexed_at' => 'datetime',
+        'sentiment' => 'float',
     ];
 
     /**

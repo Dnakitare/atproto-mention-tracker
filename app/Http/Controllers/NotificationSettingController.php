@@ -39,12 +39,14 @@ class NotificationSettingController extends Controller
         $request->validate([
             'email_notifications' => 'boolean',
             'in_app_notifications' => 'boolean',
+            'slack_webhook_url' => 'nullable|url',
         ]);
 
         $settings = Auth::user()->notificationSetting;
         $settings->update([
             'email_notifications' => $request->boolean('email_notifications', false),
             'in_app_notifications' => $request->boolean('in_app_notifications', false),
+            'slack_webhook_url' => $request->input('slack_webhook_url'),
         ]);
 
         return redirect()->route('settings.notifications')

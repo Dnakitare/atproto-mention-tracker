@@ -21,6 +21,7 @@ class NotificationSetting extends Model
         'in_app_notifications',
         'email_frequency',
         'notification_preferences',
+        'slack_webhook_url',
     ];
 
     /**
@@ -31,12 +32,11 @@ class NotificationSetting extends Model
     protected $casts = [
         'email_notifications' => 'boolean',
         'in_app_notifications' => 'boolean',
-        'email_frequency' => 'array',
         'notification_preferences' => 'array',
     ];
 
     /**
-     * Get the user that owns the notification settings.
+     * Get the user that owns the notification setting.
      */
     public function user(): BelongsTo
     {
