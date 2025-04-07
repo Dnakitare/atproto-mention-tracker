@@ -11,7 +11,13 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        //
+        $this->app->bind(AlertService::class, function ($app) {
+            return new AlertService();
+        });
+        
+        $this->app->bind(SentimentAnalysisService::class, function ($app) {
+            return new SentimentAnalysisService();
+        });
     }
 
     /**

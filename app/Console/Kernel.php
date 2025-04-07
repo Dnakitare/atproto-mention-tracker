@@ -17,9 +17,9 @@ class Kernel extends ConsoleKernel
             ->everyFifteenMinutes()
             ->withoutOverlapping();
 
-        // Send daily digest at 9 AM
-        $schedule->command('mentions:send-daily-digest')
-            ->dailyAt('09:00')
+        // Send daily digests at 8 AM
+        $schedule->command('mentions:send-daily-digests')
+            ->dailyAt('08:00')
             ->withoutOverlapping();
     }
 

@@ -2,45 +2,36 @@
 
 namespace App\Notifications;
 
+use App\Models\Mention;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
-use Illuminate\Notifications\Messages\MailMessage;
+use Illuminate\Notifications\Messages\BroadcastMessage;
 use Illuminate\Notifications\Notification;
+use Illuminate\Notifications\Messages\MailMessage;
+use Illuminate\Notifications\Messages\SlackMessage;
 
 class NewMention extends Notification implements ShouldQueue
 {
     use Queueable;
 
-    private array $mentionData;
+    private array $notification;
+    private Mention $mention;
 
     /**
      * Create a new notification instance.
      */
-    public function __construct(array $mentionData)
+    public function __construct(array $notification, Mention $mention)
     {
-        $this->mentionData = $mentionData;
+        $this->notification = $notification;
+        $this->mention = $mention;
     }
 
     /**
      * Get the notification's delivery channels.
-     *
-     * @return array<int, string>
      */
     public function via(object $notifiable): array
     {
-        return ['database', 'mail'];
-    }
-
-    /**
-     * Get the mail representation of the notification.
-     */
-    public function toMail(object $notifiable): MailMessage
-    {
-        return (new MailMessage)
-            ->subject($this->mentionData['title'])
-            ->line($this->mentionData['message'])
-            ->action('View Post', $this->mentionData['link'])
-            ->line('Thank you for using our application!');
+        return ['database', 'broadcast'];
     }
 
     /**
@@ -50,11 +41,18 @@ class NewMention extends Notification implements ShouldQueue
      */
     public function toArray(object $notifiable): array
     {
-        return [
-            'title' => $this->mentionData['title'],
-            'message' => $this->mentionData['message'],
-            'link' => $this->mentionData['link'],
-            'mention' => $this->mentionData['mention'],
-        ];
+        return $this->notification;
+    }
+
+    /**
+     * Get the broadcastable representation of the notification.
+     */
+    public function toBroadcast(object $notifiable): BroadcastMessage
+    {
+        return new BroadcastMessage([
+            'title' => $this->notification['title'],
+            'message' => $this->notification['message'],
+            'link' => $this->notification['link'],
+        ]);
     }
 }

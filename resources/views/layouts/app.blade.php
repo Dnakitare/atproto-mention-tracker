@@ -43,6 +43,9 @@
                                 <a class="nav-link" href="{{ route('keywords.index') }}">{{ __('Keywords') }}</a>
                             </li>
                             <li class="nav-item">
+                                <a class="nav-link" href="{{ route('alerts.index') }}">{{ __('Alerts') }}</a>
+                            </li>
+                            <li class="nav-item">
                                 <a class="nav-link" href="{{ route('settings.notifications') }}">{{ __('Settings') }}</a>
                             </li>
                         @endauth

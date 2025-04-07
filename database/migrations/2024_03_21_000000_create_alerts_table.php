@@ -6,27 +6,23 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
     public function up(): void
     {
-        Schema::create('tracked_keywords', function (Blueprint $table) {
+        Schema::create('alerts', function (Blueprint $table) {
             $table->id();
             $table->foreignId('user_id')->constrained()->onDelete('cascade');
-            $table->string('keyword');
-            $table->boolean('is_active')->default(true);
+            $table->string('name');
+            $table->text('description')->nullable();
+            $table->string('type');
+            $table->json('conditions');
+            $table->json('notification_channels');
+            $table->timestamp('last_triggered_at')->nullable();
             $table->timestamps();
-            
-            $table->unique(['user_id', 'keyword']);
         });
     }
 
-    /**
-     * Reverse the migrations.
-     */
     public function down(): void
     {
-        Schema::dropIfExists('tracked_keywords');
+        Schema::dropIfExists('alerts');
     }
-};
+}; 

@@ -66,24 +66,86 @@ class NotificationService
     {
         $settings = $user->notificationSetting;
 
-        if (!$settings || !$settings->email_notifications) {
+        if (!$settings || !$settings->daily_digest) {
             return;
         }
 
-        $recentMentions = $user->mentions()
-            ->where('created_at', '>=', now()->subDay())
+        $yesterday = now()->subDay();
+        $mentions = $user->mentions()
+            ->whereDate('post_indexed_at', $yesterday)
+            ->orderBy('post_indexed_at', 'desc')
             ->get();
-
-        if ($recentMentions->isEmpty()) {
-            return;
-        }
 
         $emailData = [
             'user' => $user,
-            'mentions' => $recentMentions,
+            'mentions' => $mentions,
+            'date' => $yesterday->format('F j, Y'),
         ];
 
         Mail::to($user->email)
             ->queue(new \App\Mail\DailyDigest($emailData));
+    }
+
+    /**
+     * Send a notification to a user
+     */
+    public function sendNotification(User $user, string $type, array $data): void
+    {
+        // Get user's notification settings
+        $settings = $user->notificationSetting;
+        
+        if (!$settings) {
+            return;
+        }
+        
+        // Check if notification type is enabled
+        if (!isset($settings->notification_preferences[$type]) || !$settings->notification_preferences[$type]) {
+            return;
+        }
+        
+        // Send notification based on type
+        switch ($type) {
+            case 'new_mention':
+                $user->notify(new NewMention($data['mention']));
+                break;
+            case 'alert':
+                $user->notify(new MentionAlert($data['alert'], $data['mentions']));
+                break;
+            case 'digest':
+                $user->notify(new MentionDigest($data['mentions']));
+                break;
+        }
+    }
+    
+    /**
+     * Send a digest notification to a user
+     */
+    public function sendDigest(User $user): void
+    {
+        // Get user's notification settings
+        $settings = $user->notificationSetting;
+        
+        if (!$settings || !$settings->email_notifications || $settings->email_frequency !== 'digest') {
+            return;
+        }
+        
+        // Get mentions since last digest
+        $mentions = $user->mentions()
+            ->where('created_at', '>', $settings->last_digest_sent_at ?? now()->subDay())
+            ->get();
+        
+        if ($mentions->isEmpty()) {
+            return;
+        }
+        
+        // Send digest notification
+        $this->sendNotification($user, 'digest', [
+            'mentions' => $mentions,
+        ]);
+        
+        // Update last digest sent at
+        $settings->update([
+            'last_digest_sent_at' => now(),
+        ]);
     }
 } 

@@ -127,4 +127,65 @@ class BlueskyService
             return null;
         }
     }
+
+    /**
+     * Search for mentions of a user
+     */
+    public function searchMentions(string $handle, array $keywords = []): array
+    {
+        // Build search query
+        $query = "@{$handle}";
+        if (!empty($keywords)) {
+            $query .= ' ' . implode(' OR ', $keywords);
+        }
+        
+        // Search for posts
+        $response = $this->client()
+            ->post('/app.bsky.feed.searchPosts', [
+                'json' => [
+                    'q' => $query,
+                    'limit' => 100,
+                ],
+            ]);
+        
+        $data = json_decode($response->getBody(), true);
+        
+        // Process posts
+        $mentions = [];
+        foreach ($data['posts'] as $post) {
+            // Skip if post is from the user themselves
+            if ($post['author']['handle'] === $handle) {
+                continue;
+            }
+            
+            // Skip if post doesn't mention the user
+            if (!str_contains(strtolower($post['text']), strtolower("@{$handle}"))) {
+                continue;
+            }
+            
+            // Skip if post doesn't contain any keywords
+            if (!empty($keywords)) {
+                $containsKeyword = false;
+                foreach ($keywords as $keyword) {
+                    if (str_contains(strtolower($post['text']), strtolower($keyword))) {
+                        $containsKeyword = true;
+                        break;
+                    }
+                }
+                if (!$containsKeyword) {
+                    continue;
+                }
+            }
+            
+            $mentions[] = [
+                'post_id' => $post['uri'],
+                'author_handle' => $post['author']['handle'],
+                'text' => $post['text'],
+                'post_url' => "https://bsky.app/profile/{$post['author']['handle']}/post/{$post['uri']}",
+                'post_indexed_at' => $post['indexedAt'],
+            ];
+        }
+        
+        return $mentions;
+    }
 } 

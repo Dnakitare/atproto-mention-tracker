@@ -35,6 +35,15 @@
                             <div class="form-text">You'll see notifications in the app whenever a new mention is found.</div>
                         </div>
 
+                        <div class="mb-4">
+                            <h5>Slack Notifications</h5>
+                            <div class="form-group">
+                                <label for="slack_webhook_url" class="form-label">Slack Webhook URL</label>
+                                <input type="url" class="form-control" id="slack_webhook_url" name="slack_webhook_url" value="{{ $settings->slack_webhook_url }}" placeholder="https://hooks.slack.com/services/...">
+                                <div class="form-text">Enter your Slack webhook URL to receive notifications in your Slack workspace. <a href="https://api.slack.com/messaging/webhooks" target="_blank">Learn how to create a webhook</a></div>
+                            </div>
+                        </div>
+
                         <div class="d-flex justify-content-end">
                             <button type="submit" class="btn btn-primary">Save Settings</button>
                         </div>
