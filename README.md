@@ -178,3 +178,89 @@ The project follows PSR-12 coding standards. You can check your code style with:
 ## License
 
 This project is licensed under the MIT License - see the LICENSE file for details.
+
+## Deployment
+
+### Prerequisites
+- Docker and Docker Compose
+- Git
+- Composer (for local development)
+
+### Environment Setup
+1. Copy the environment file:
+```bash
+cp .env.example .env
+```
+
+2. Update the following environment variables in `.env`:
+```
+APP_ENV=production
+APP_DEBUG=false
+DB_DATABASE=atproto_mention_tracker
+DB_USERNAME=postgres
+DB_PASSWORD=your_secure_password
+REDIS_HOST=redis
+QUEUE_CONNECTION=redis
+```
+
+### Docker Deployment
+1. Build and start the containers:
+```bash
+docker-compose up -d --build
+```
+
+2. Run migrations:
+```bash
+docker-compose exec app php artisan migrate --force
+```
+
+3. Clear cache and optimize:
+```bash
+docker-compose exec app php artisan optimize
+docker-compose exec app php artisan config:cache
+docker-compose exec app php artisan route:cache
+```
+
+4. Set up the scheduler for background jobs:
+```bash
+docker-compose exec app php artisan schedule:work
+```
+
+### Health Checks
+The application includes health check endpoints:
+- `/health`: Basic application health check
+- `/health/detailed`: Detailed health check including database and Redis connectivity
+
+### Monitoring
+- Application logs: `docker-compose logs -f app`
+- Database logs: `docker-compose logs -f db`
+- Redis logs: `docker-compose logs -f redis`
+- Nginx logs: `docker-compose logs -f nginx`
+
+### Backup and Maintenance
+1. Database backup:
+```bash
+docker-compose exec db pg_dump -U postgres atproto_mention_tracker > backup.sql
+```
+
+2. Restore database:
+```bash
+docker-compose exec -T db psql -U postgres atproto_mention_tracker < backup.sql
+```
+
+### Troubleshooting
+1. If services are not starting:
+```bash
+docker-compose down
+docker-compose up -d
+```
+
+2. If migrations fail:
+```bash
+docker-compose exec app php artisan migrate:fresh --force
+```
+
+3. If Redis connection fails:
+```bash
+docker-compose restart redis
+```

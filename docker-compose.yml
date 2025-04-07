@@ -12,6 +12,18 @@ services:
       - ./:/var/www
     networks:
       - atproto-mention-tracker
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    environment:
+      - APP_ENV=${APP_ENV:-production}
+      - APP_DEBUG=${APP_DEBUG:-false}
+      - DB_CONNECTION=pgsql
+      - DB_HOST=db
+      - REDIS_HOST=redis
+      - QUEUE_CONNECTION=redis
 
   db:
     image: postgres:15-alpine
@@ -25,6 +37,11 @@ services:
       - dbdata:/var/lib/postgresql/data
     networks:
       - atproto-mention-tracker
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   redis:
     image: redis:alpine
@@ -32,6 +49,11 @@ services:
     restart: unless-stopped
     networks:
       - atproto-mention-tracker
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   nginx:
     image: nginx:alpine
@@ -44,6 +66,8 @@ services:
       - ./docker/nginx:/etc/nginx/conf.d/
     networks:
       - atproto-mention-tracker
+    depends_on:
+      - app
 
 networks:
   atproto-mention-tracker:
