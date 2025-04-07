@@ -5,6 +5,7 @@ A Laravel application for tracking and analyzing mentions on the AT Protocol (Bl
 ## Features
 
 - Track mentions of your AT Protocol handle
+- Manage tracked keywords with active/inactive status
 - Analyze sentiment of mentions
 - Set up alerts for various conditions:
   - Mention spikes
@@ -14,12 +15,15 @@ A Laravel application for tracking and analyzing mentions on the AT Protocol (Bl
   - Email
   - Slack
   - In-app notifications
+- Structured logging for better debugging and monitoring
+- Redis caching for improved performance
 
 ## Requirements
 
 - PHP 8.1 or higher
 - Laravel 10.x
 - MySQL 8.0 or higher
+- Redis
 - Composer
 - Node.js and npm (for frontend assets)
 
@@ -61,12 +65,19 @@ A Laravel application for tracking and analyzing mentions on the AT Protocol (Bl
    DB_PASSWORD=your_password
    ```
 
-7. Run database migrations:
+7. Configure Redis in the `.env` file:
+   ```
+   REDIS_HOST=127.0.0.1
+   REDIS_PASSWORD=null
+   REDIS_PORT=6379
+   ```
+
+8. Run database migrations:
    ```bash
    php artisan migrate
    ```
 
-8. Build frontend assets:
+9. Build frontend assets:
    ```bash
    npm run build
    ```
@@ -118,6 +129,20 @@ MAIL_FROM_NAME="${APP_NAME}"
 
 ## Usage
 
+### Managing Keywords
+
+1. Log in to the application
+2. Navigate to the Keywords section
+3. Add new keywords:
+   - Enter the keyword text
+   - Select the type (keyword, username, or hashtag)
+   - Set the active status
+4. Edit existing keywords:
+   - Modify the keyword text
+   - Change the type
+   - Toggle active status
+5. Delete keywords when no longer needed
+
 ### Setting Up Alerts
 
 1. Log in to the application
@@ -156,6 +181,20 @@ The project follows PSR-12 coding standards. You can check your code style with:
 ./vendor/bin/phpcs
 ```
 
+### Logging
+
+The application uses structured logging with the following features:
+- JSON-formatted log entries
+- Request ID tracking
+- User context in logs
+- Environment information
+- Memory usage tracking
+- Web request details
+
+Log files are stored in `storage/logs/`:
+- `laravel.log`: Standard application logs
+- `structured.log`: JSON-formatted structured logs
+
 ## Troubleshooting
 
 ### Common Issues
@@ -174,6 +213,11 @@ The project follows PSR-12 coding standards. You can check your code style with:
    - Verify your AT Protocol credentials
    - Check if the sentiment analysis service is running
    - Review the logs for any API errors
+
+4. **Redis connection issues**
+   - Verify Redis is running
+   - Check Redis configuration in `.env`
+   - Ensure the Redis PHP extension is installed
 
 ## License
 
@@ -246,21 +290,4 @@ docker-compose exec db pg_dump -U postgres atproto_mention_tracker > backup.sql
 2. Restore database:
 ```bash
 docker-compose exec -T db psql -U postgres atproto_mention_tracker < backup.sql
-```
-
-### Troubleshooting
-1. If services are not starting:
-```bash
-docker-compose down
-docker-compose up -d
-```
-
-2. If migrations fail:
-```bash
-docker-compose exec app php artisan migrate:fresh --force
-```
-
-3. If Redis connection fails:
-```bash
-docker-compose restart redis
 ```
