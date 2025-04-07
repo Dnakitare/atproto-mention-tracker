@@ -5,11 +5,15 @@ namespace App\Services;
 use Illuminate\Http\Client\PendingRequest;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Redis;
 
 class BlueskyService
 {
     private string $baseUrl;
     private ?string $accessJwt = null;
+    private const RATE_LIMIT_KEY = 'bluesky:rate_limit:';
+    private const RATE_LIMIT_WINDOW = 60; // 1 minute
+    private const MAX_REQUESTS = 30; // 30 requests per minute
 
     public function __construct()
     {
@@ -17,10 +21,29 @@ class BlueskyService
     }
 
     /**
+     * Check if we're within rate limits
+     */
+    private function checkRateLimit(): bool
+    {
+        $key = self::RATE_LIMIT_KEY . date('Y-m-d-H');
+        $current = Redis::incr($key);
+        
+        if ($current === 1) {
+            Redis::expire($key, self::RATE_LIMIT_WINDOW);
+        }
+        
+        return $current <= self::MAX_REQUESTS;
+    }
+
+    /**
      * Create an authenticated HTTP client
      */
     private function client(): PendingRequest
     {
+        if (!$this->checkRateLimit()) {
+            throw new \Exception('Rate limit exceeded. Please try again later.');
+        }
+
         $client = Http::baseUrl($this->baseUrl)
             ->timeout(30)
             ->withHeaders([
