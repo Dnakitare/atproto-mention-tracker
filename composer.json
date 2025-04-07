@@ -12,6 +12,7 @@
         "laravel/sanctum": "^4.0",
         "laravel/slack-notification-channel": "^3.5",
         "laravel/tinker": "^2.8",
+        "laravel/ui": "^4.6",
         "predis/predis": "^2.0"
     },
     "require-dev": {

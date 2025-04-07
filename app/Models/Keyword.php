@@ -6,23 +6,26 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-class Mention extends Model
+class Keyword extends Model
 {
     use HasFactory;
 
     /**
+     * The table associated with the model.
+     *
+     * @var string
+     */
+    protected $table = 'tracked_keywords';
+
+    /**
      * The attributes that are mass assignable.
      *
-     * @var array<string>
+     * @var array<int, string>
      */
     protected $fillable = [
         'user_id',
-        'keyword_id',
-        'author_handle',
-        'text',
-        'post_url',
-        'post_indexed_at',
-        'sentiment',
+        'keyword',
+        'is_active',
     ];
 
     /**
@@ -31,12 +34,11 @@ class Mention extends Model
      * @var array<string, string>
      */
     protected $casts = [
-        'post_indexed_at' => 'datetime',
-        'sentiment' => 'float',
+        'is_active' => 'boolean',
     ];
 
     /**
-     * Get the user that owns the mention.
+     * Get the user that owns the keyword.
      */
     public function user(): BelongsTo
     {
@@ -44,10 +46,10 @@ class Mention extends Model
     }
 
     /**
-     * Get the keyword that triggered this mention.
+     * Scope a query to only include active keywords.
      */
-    public function keyword(): BelongsTo
+    public function scopeActive($query)
     {
-        return $this->belongsTo(Keyword::class);
+        return $query->where('is_active', true);
     }
-}
+} 

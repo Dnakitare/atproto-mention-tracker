@@ -43,6 +43,7 @@
                         </div>
 
                         <div class="mb-3 form-check">
+                            <input type="hidden" name="is_active" value="0">
                             <input type="checkbox" class="form-check-input" id="is_active" name="is_active" value="1" {{ old('is_active', $keyword->is_active) ? 'checked' : '' }}>
                             <label class="form-check-label" for="is_active">Active</label>
                             <div class="form-text">Uncheck to temporarily disable tracking for this keyword.</div>

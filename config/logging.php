@@ -54,7 +54,7 @@ return [
 
         'stack' => [
             'driver' => 'stack',
-            'channels' => explode(',', env('LOG_STACK', 'single')),
+            'channels' => explode(',', env('LOG_STACK', 'single,structured')),
             'ignore_exceptions' => false,
         ],
 
@@ -125,6 +125,25 @@ return [
 
         'emergency' => [
             'path' => storage_path('logs/laravel.log'),
+        ],
+
+        'structured' => [
+            'driver' => 'monolog',
+            'handler' => StreamHandler::class,
+            'handler_with' => [
+                'stream' => storage_path('logs/structured.log'),
+                'level' => env('LOG_LEVEL', 'debug'),
+            ],
+            'formatter' => \Monolog\Formatter\JsonFormatter::class,
+            'formatter_with' => [
+                'dateFormat' => 'Y-m-d H:i:s',
+                'includeStacktraces' => true,
+            ],
+            'processors' => [
+                PsrLogMessageProcessor::class,
+                \Monolog\Processor\WebProcessor::class,
+                \Monolog\Processor\MemoryUsageProcessor::class,
+            ],
         ],
 
     ],
